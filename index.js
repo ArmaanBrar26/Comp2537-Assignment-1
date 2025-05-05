@@ -12,7 +12,7 @@ const app = express();
 const Joi = require('joi');
 
 const mongodb_host = process.env.MONGODB_HOST;
-const mongodb_user = process.env.MONGODB_USER;
+const mongodb_user = process.env.MONGODB_USERNAME;
 const mongodb_password = process.env.MONGODB_PASSWORD;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
@@ -20,6 +20,13 @@ const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 
 app.use(express.urlencoded({ extended: false }));
+
+console.log({
+    mongodb_host,
+    mongodb_user,
+    mongodb_password,
+    mongodb_database,
+});
 
 const client = new MongoClient(`mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`);
 
@@ -56,7 +63,7 @@ app.get('/', (req, res) => {
         <form method="GET" action="/signup">
         <button type="submit">Sign Up</button>
         </form>
-        <form method="POST" action="/login">
+        <form method="GET" action="/login">
         <button type="submit">Login</button>
         </form>
         </body>
@@ -78,7 +85,22 @@ app.get('/signup', (req, res) => {
         </html>`)
 });
 
+app.get('/login', (req, res) => {
+    res.send(`
+        <html>
+        <body>
+        <h1>Login</h1>
+        <form method="POST" action="/members/login">
+        <input type="email" name="email" placeholder="Email"/>
+        <input type="password" name="password" placeholder="Password"/>
+        <button type="submit">Login</button>
+        </form>
+        </body>
+        </html>`)
+})
+
 app.post('/members', async (req, res) => {
+    const userCollection = req.app.locals.userCollection; // Access the collection from app locals
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
@@ -125,22 +147,22 @@ app.get('/members', (req, res) => {
         </html>`);
 });
 
-// 404 Page Not Found Handler
-app.get('*', (req, res) => {
-    res.status(404);
-    res.send(`
-        <html>
-        <body>
-        <h1>Page Not Found - 404</h1>
-        <p>The page you are looking for does not exist.</p>
-        <a href="/">Go back to Home</a>
-        </body>
-        </html>`);
-});
+app.post('/logout', async (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        res.redirect('/'); // Redirect to the home page after logout
+    });
+})
+
 
 async function startServer() {
     const database = await connectToDatabase();
     const userCollection = database.collection('users');
+
+    app.locals.userCollection = userCollection; // Store the collection in app 
 
     // Your existing server setup code goes here
     app.listen(port, () => {
