@@ -31,7 +31,7 @@ async function connectToDatabase() {
         return client.db(mongodb_database);
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
-        process.exit(1); // Exit the application if the database connection fails
+        process.exit(1); 
     }
 }
 
@@ -47,13 +47,12 @@ app.use(session({
     secret: node_session_secret,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+    cookie: { maxAge: 60 * 60 * 1000 }
 }));
 
 
 app.get('/', (req, res) => {
     if (req.session.user) {
-        // If logged in, show links to members and signout
         res.send(`
             <html>
             <body>
@@ -67,7 +66,6 @@ app.get('/', (req, res) => {
             </body>
             </html>`);
     } else {
-        // If not logged in, show links to signup and login
         res.send(`
             <html>
             <body>
@@ -157,11 +155,11 @@ app.post('/login', async (req, res) => {
     }
 
     req.session.user = { name: user.name, email: user.email };
-    res.redirect('/members'); // Redirect to the members page after successful login
+    res.redirect('/members'); 
 });
 
 app.post('/members', async (req, res) => {
-    const userCollection = req.app.locals.userCollection; // Access the collection from app locals
+    const userCollection = req.app.locals.userCollection; 
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
@@ -230,7 +228,7 @@ app.post('/logout', async (req, res) => {
             console.error('Error destroying session:', err);
             return res.status(500).send('Internal Server Error');
         }
-        res.redirect('/'); // Redirect to the home page after logout
+        res.redirect('/'); 
     });
 })
 
@@ -239,7 +237,7 @@ async function startServer() {
     const database = await connectToDatabase();
     const userCollection = database.collection('users');
 
-    app.locals.userCollection = userCollection; // Store the collection in app 
+    app.locals.userCollection = userCollection;
 
     app.listen(port, () => {
         console.log(`Server is running on http://localhost:${port}`);
