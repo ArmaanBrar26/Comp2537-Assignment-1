@@ -24,12 +24,6 @@ app.use(express.static('public'));
 
 const client = new MongoClient(`mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`);
 
-console.log("MONGODB CONNECTION DEBUG:");
-console.log("User:", process.env.MONGODB_USERNAME);
-console.log("Password:", process.env.MONGODB_PASSWORD);
-console.log("Host:", process.env.MONGODB_HOST);
-console.log("Database:", process.env.MONGODB_DATABASE);
-
 
 async function connectToDatabase() {
     try {
@@ -237,7 +231,7 @@ app.post('/logout', async (req, res) => {
         }
         res.redirect('/'); 
     });
-})
+});
 
 
 async function startServer() {
@@ -252,3 +246,8 @@ async function startServer() {
 }
 
 startServer();
+
+app.get("*dummy", (req,res) => {
+    res.status(404);
+    res.send("Page not found - 404");
+});
