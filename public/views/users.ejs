@@ -1,0 +1,17 @@
+<ol>
+  <% users.forEach(user => { %>
+    <li>
+      <form method="POST" action="/admin/updateUserType" class="flex items-center space-x-4">
+        <span><%= user.name %></span>
+        <select name="user_type" class="border rounded px-2 py-1">
+          <option value="user" <%= user.user_type === "user" ? "selected" : "" %>>User</option>
+          <option value="admin" <%= user.user_type === "admin" ? "selected" : "" %>>Admin</option>
+        </select>
+        <input type="hidden" name="name" value="<%= user.name %>">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-700">
+          Update
+        </button>
+      </form>
+    </li>
+  <% }); %>
+</ol>
